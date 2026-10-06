@@ -4,7 +4,7 @@ from datetime import datetime
 from polymarket_us import PolymarketUS
 
 CSV_FILE = "polymarket_withdrawals.csv"
-SECRETS_FILE = "Secret.txt"
+SECRETS_FILE = "../Secret.txt"
 
 
 def load_secrets():

@@ -9,7 +9,7 @@ from openpyxl.utils import get_column_letter
 from polymarket_us import PolymarketUS
 
 XLSX_FILE = "polymarket_trades_pnl.xlsx"
-SECRETS_FILE = "Secret.txt"
+SECRETS_FILE = "../Secret.txt"
 
 
 def load_secrets():
