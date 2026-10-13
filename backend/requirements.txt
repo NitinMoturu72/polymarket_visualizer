@@ -1,1 +1,3 @@
 polymarket-us
+sqlalchemy
+alembic
