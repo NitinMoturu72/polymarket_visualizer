@@ -1,3 +1,4 @@
 polymarket-us
 sqlalchemy
 alembic
+cryptography
