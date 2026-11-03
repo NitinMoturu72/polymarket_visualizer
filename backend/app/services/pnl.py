@@ -13,6 +13,7 @@ class Position:
         self.cost_basis = Decimal("0")
         self.opened_at = None
         self.market = ""
+        self.market_slug = ""
         self.outcome = ""
         self.side_label = ""
 
@@ -37,7 +38,7 @@ def effective_price(price_value, outcome_side):
 
     return price
 
-def fetch_all_activities(client):
+def fetch_trade_activities(client):
     """Page through every TRADE and POSITION_RESOLUTION activity."""
 
     activities = []
@@ -123,6 +124,7 @@ def build_rows(activities):
                 "closed": None,
                 "status": "Still Open",
                 "market": position.market,
+                "market_slug": position.market_slug,
                 "outcome": position.outcome,
                 "side": position.side_label,
                 "qty": abs(position.qty),
@@ -165,6 +167,7 @@ def process_trade(activity, positions, commission_tracker):
     key = (market_slug, outcome, outcome_side)
     position = positions.setdefault(key, Position())
     position.market = metadata.get("title") or market_slug
+    position.market_slug = market_slug
     position.outcome = outcome
     position.side_label = side_label
 
@@ -186,6 +189,7 @@ def process_trade(activity, positions, commission_tracker):
                 "closed": None,
                 "status": "Open (Combo)",
                 "market": position.market,
+                "market_slug": position.market_slug,
                 "outcome": outcome,
                 "side": side_label,
                 "qty": qty,
@@ -205,6 +209,7 @@ def process_trade(activity, positions, commission_tracker):
                 "closed": date,
                 "status": "Unmatched Sell",
                 "market": position.market,
+                "market_slug": position.market_slug,
                 "outcome": outcome,
                 "side": side_label,
                 "qty": qty,
@@ -241,6 +246,7 @@ def process_trade(activity, positions, commission_tracker):
             "closed": date,
             "status": status,
             "market": position.market,
+            "market_slug": position.market_slug,
             "outcome": outcome,
             "side": side_label,
             "qty": qty_closed,
@@ -256,6 +262,7 @@ def process_trade(activity, positions, commission_tracker):
         "closed": date,
         "status": "Unrecognized",
         "market": position.market,
+        "market_slug": position.market_slug,
         "outcome": outcome,
         "side": side_label,
         "qty": qty,
@@ -327,6 +334,7 @@ def process_resolution(activity, positions):
         "closed": date,
         "status": "Resolved",
         "market": metadata.get("title") or market_slug,
+        "market_slug": market_slug,
         "outcome": outcome,
         "side": "",
         "qty": qty_before_abs,

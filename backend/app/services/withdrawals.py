@@ -1,6 +1,6 @@
 from .utils import format_time
 
-def fetch_all_activities(client):
+def fetch_withdrawal_activities(client):
 
     activities = []
     cursor = ""
