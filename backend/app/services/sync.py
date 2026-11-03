@@ -1,6 +1,6 @@
 from datetime import datetime
 from app.db import SessionLocal
-from app.models import Trade, Withdrawal
+from app.models import SyncRun, Trade, Withdrawal
 from app.polymarket_client import get_client
 from app.services.pnl import fetch_trade_activities, build_rows
 from app.services.withdrawals import fetch_withdrawal_activities, build_withdrawal_rows
@@ -70,11 +70,43 @@ def sync_withdrawals(db, client):
         
     return len(rows)
 
-def run_full_sync():
+def run_full_sync(triggered_by):
     db = SessionLocal()
-    client = get_client()
-    total_commission,trade_count = sync_trades(db, client)
-    total_withdrawals = sync_withdrawals(db, client)
+    running = db.query(SyncRun).filter(SyncRun.status == "running").first()
+
+    if running is not None:
+        db.close()
+        raise Exception("Sync already running")
+
+    sync_run = SyncRun(
+        sync_type="full",
+        started_at=datetime.now().isoformat(),
+        status="running",
+        triggered_by=triggered_by,
+    )
+    db.add(sync_run)
     db.commit()
-    db.close()
-    return total_commission, trade_count, total_withdrawals
+
+    try:
+        client = get_client()
+        total_commission,trade_count = sync_trades(db, client)
+        total_withdrawals_count = sync_withdrawals(db, client)
+        db.commit()
+
+        sync_run.status = "success"
+        sync_run.finished_at = datetime.now().isoformat()
+        sync_run.rows_written = trade_count + total_withdrawals_count
+
+        db.commit()
+
+        return total_commission, trade_count, total_withdrawals_count
+
+    except Exception as e:
+        sync_run.status = "error"
+        sync_run.finished_at = datetime.now().isoformat()
+        sync_run.error_message = str(e)
+        db.commit()
+        raise
+
+    finally:
+        db.close()
