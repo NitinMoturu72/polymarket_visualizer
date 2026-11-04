@@ -7,3 +7,10 @@ DB_PATH = Path(__file__).resolve().parent.parent / "data" / "polymarket.db"
 engine = create_engine(f"sqlite:///{DB_PATH}")
 SessionLocal = sessionmaker(bind=engine)
 
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

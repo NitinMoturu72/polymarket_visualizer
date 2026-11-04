@@ -2,3 +2,5 @@ polymarket-us
 sqlalchemy
 alembic
 cryptography
+fastapi
+uvicorn[standard]
