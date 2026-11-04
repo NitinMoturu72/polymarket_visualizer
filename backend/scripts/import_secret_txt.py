@@ -11,9 +11,9 @@ SECRET_PATH = Path(__file__).resolve().parent.parent.parent / "Secret.txt"
 
 if __name__ == "__main__":
     secrets = load_secrets(SECRET_PATH)
-    print("Loaded secrets:", secrets)
+    # print("Loaded secrets:", secrets)
     encrypted_secrets = {key: encrypt_str(value) for key, value in secrets.items()}
-    print("Encrypted secrets:", encrypted_secrets)
+    # print("Encrypted secrets:", encrypted_secrets)
     db = SessionLocal()
     secret_table = db.query(Credential).first()
     now = datetime.now().isoformat()
