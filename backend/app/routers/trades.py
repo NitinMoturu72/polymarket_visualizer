@@ -49,3 +49,19 @@ def get_trade_summary(db: Session = Depends(get_db)):
     }
 
 
+
+@router.get("/cumulative-pnl")
+def get_cumulative_pnl(db: Session = Depends(get_db)):
+    trades = db.query(Trade).filter(Trade.closed_at.isnot(None)).order_by(Trade.closed_at.asc()).all()
+
+    running_total = Decimal(0)
+    points = []
+
+    for t in trades:
+        running_total += dec(t.realized_pnl)
+        points.append({
+            "date": t.closed_at,
+            "cumulative_pnl": str(running_total)
+        })
+
+    return points
