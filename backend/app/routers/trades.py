@@ -3,6 +3,10 @@ from fastapi import APIRouter,Depends
 from app.db import get_db
 from app.models import Trade
 from sqlalchemy.orm import Session
+from app.services.utils import dec
+
+from decimal import Decimal
+
 
 router = APIRouter(prefix="/api/trades")
 
@@ -29,3 +33,19 @@ def get_trades(db: Session = Depends(get_db)):
         for t in trades
         ]
     return rows
+
+
+@router.get("/summary")
+def get_trade_summary(db: Session = Depends(get_db)):
+    trades = db.query(Trade).all()
+
+    total_realized_pnl = sum(dec(t.realized_pnl) for t in trades)
+    total_commission = sum(dec(t.commission) for t in trades)
+
+    return {
+        "total_realized_pnl": str(total_realized_pnl),
+        "total_commission": str(total_commission),
+        "trade_count": len(trades)
+    }
+
+
